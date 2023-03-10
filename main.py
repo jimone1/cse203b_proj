@@ -10,7 +10,7 @@ IRIS_DATASET="Iris Dataset" # https://archive.ics.uci.edu/ml/datasets/iris 3 cla
 WINE_DATASET="Wine Dataset" # https://archive.ics.uci.edu/ml/datasets/wine 2 classes
 
 ALL_DATASET = {
-    # FASHION_MNIST,
+    FASHION_MNIST,
     BREAST_CANCER,
     IRIS_DATASET,
     WINE_DATASET
@@ -41,6 +41,11 @@ def loadData(datasetName):
     return X, y
 
 
+# This can be implemented later.
+def preProcessing(X, y):
+    return X, y
+
+# TODO: IMplement Convex optimization here!
 def dataProcessing(X):
     # Applies Convex Optimization.
     # Scale features using StandardScaler
@@ -70,14 +75,20 @@ if __name__ == '__main__':
     # Dataset Refs:
         # 1. FASHION_MNIST
         # 2. BREAST_CANCER
+        # 3. IRIS_DATASET
+        # 4. WINE_DATASET
     
     i = 0
     for data_set in ALL_DATASET:
         print(f"{i}: {data_set}")
         X, y = loadData(data_set)
+        
+        print("Data preprocessing")
+        X, y = preProcessing(X, y)
+
         print("Train Before Data Processing")
         training(X, y)
-        
+
         print("Train After Data Processing")
         X = dataProcessing(X)
         training(X, y)
@@ -94,3 +105,13 @@ if __name__ == '__main__':
 #         Wine data set.  Breast Cancer.    Iris
 # Before      44.9 %        89.8%           33.3 %
 # After       46.1 %        97.5%          33.3 %
+
+# Data: Base        Filtered Case (Binarization, Convex Opt) Binary -> convex opt
+# Convex opt -> normal datset
+#     Base Acc        Improved Acc
+#       30%             60%                         -> 30%
+# Convex opt -> filtered dataset 
+#     Base Acc        Improved Acc
+#       60%             70% (best perf)             -> 10%
+
+# Blurring -> Image Smoothing, Image Sharpening -> Binarization
