@@ -45,7 +45,7 @@ def loadData(datasetName):
 def preProcessing(X, y):
     return X, y
 
-# TODO: IMplement Convex optimization here!
+# TODO: Implement Convex optimization here!
 def dataProcessing(X):
     # Applies Convex Optimization.
     # Scale features using StandardScaler
