@@ -3,6 +3,10 @@ import numpy as np
 from sklearn.datasets import fetch_openml, load_breast_cancer, load_iris, load_wine
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
+import cvxpy as cp 
+import cv2
+from matplotlib import pyplot as plt
+
 
 FASHION_MNIST="Fashion-MNIST" # https://github.com/zalandoresearch/fashion-mnist 10 classes
 BREAST_CANCER="Breast Cancer Wisconsin (Diagnostic) Dataset" # https://archive.ics.uci.edu/ml/datasets/breast+cancer+wisconsin+(diagnostic) 2 classes
@@ -45,13 +49,47 @@ def loadData(datasetName):
 def preProcessing(X, y):
     return X, y
 
+
 # TODO: Implement Convex optimization here!
-def dataProcessing(X):
+def dataProcessing(G):
     # Applies Convex Optimization.
     # Scale features using StandardScaler
-    scaler = StandardScaler()
-    return scaler.fit_transform(X)
     
+    print(G.shape)
+    print(cv2.GaussianBlur(G, (5, 5), 0, 0).shape)
+    # # Smoothing func.
+    # sigmaX = 0
+    # sigmaY = 0
+    # window = (5, 5)
+    beta = 0.001
+    
+    sigmaXDim = (232, 320)
+    # m = {}
+    
+    sigmaX = cp.Variable(1)
+    sigmaY = cp.Variable(1)
+    window = cp.Variable((2,2))
+    beta = 0.5
+    
+    # X = cv2.GaussianBlur(G, window, sigmaX, sigmaY) # R 
+    # val = 
+    X = cp.Variable((232, 320))
+    print(X + np.zeros((232, 320)))
+    prob = cp.Problem(
+        cp.Minimize((cp.norm(X - G, 'fro')) ** 2 + beta * cp.pnorm(X * 0.3, 1))
+    )
+    prob.solve()
+    print(prob.value)
+    # for sigmaX in [0, 0.5, 0.8, 1]:
+    #     X = cv2.GaussianBlur(G, window, sigmaX, sigmaY) # R 
+    #     val = 
+    #     m[val] = sigmaX
+    cv2.imwrite('image.png', X.value)
+    # cv2.imshow('name2', imageProcessed)
+    # cv2.waitKey(0)
+
+    # print(m)
+    # print(m[min(m.keys())])
 
 def training(X, y):
     # Split dataset into training and testing sets
@@ -78,22 +116,29 @@ if __name__ == '__main__':
         # 3. IRIS_DATASET
         # 4. WINE_DATASET
     
-    i = 0
-    for data_set in ALL_DATASET:
-        print(f"{i}: {data_set}")
-        X, y = loadData(data_set)
+    # i = 0
+    # for data_set in ALL_DATASET:
+    #     print(f"{i}: {data_set}")
+    #     X, y = loadData(data_set)
         
-        print("Data preprocessing")
-        X, y = preProcessing(X, y)
+    #     print("Data preprocessing")
+    #     X, y = preProcessing(X, y)
 
-        print("Train Before Data Processing")
-        training(X, y)
+    #     print("Train Before Data Processing")
+    #     training(X, y)
 
-        print("Train After Data Processing")
-        X = dataProcessing(X)
-        training(X, y)
-        print()
-        i += 1
+    #     print("Train After Data Processing")
+    #     X = dataProcessing(X)
+    #     training(X, y)
+    #     print()
+    #     i += 1
+    
+    image = cv2.cvtColor(cv2.imread('flowers/daisy/5547758_eea9edfd54_n.jpg'), cv2.COLOR_BGR2GRAY)
+    number = dataProcessing(image)
+    # print(type(number))
+    # cv2.imshow('name', image)
+    # cv2.imshow('name2', imageProcessed)
+    # cv2.waitKey(0)
 
 # Convex Optimization: fit_transform 
 # Performed under SVM classifier.
