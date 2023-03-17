@@ -49,6 +49,14 @@ def loadData(datasetName):
 def preProcessing(X, y):
     return X, y
 
+def pNorm(X, p=1):
+    print(X)
+    # calculate the p-norm of x
+    p_norm = 0
+    for row in X:
+        for data in row:
+            p_norm += data**p
+    return p_norm**(1/p)
 
 # TODO: Implement Convex optimization here!
 def dataProcessing(G):
@@ -75,8 +83,9 @@ def dataProcessing(G):
     # val = 
     X = cp.Variable((232, 320))
     print(X + np.zeros((232, 320)))
+
     prob = cp.Problem(
-        cp.Minimize((cp.norm(X - G, 'fro')) ** 2 + beta * cp.pnorm(X * 0.3, 1))
+        cp.Minimize((cp.norm(X - G, 'fro')) ** 2 + beta * pNorm(X, 2))
     )
     prob.solve()
     print(prob.value)
