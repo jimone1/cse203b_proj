@@ -44,20 +44,120 @@ def loadData(datasetName):
     print(f"There are {len(classes)} labels: {classes}")
     return X, y
 
+# daisy 0
+# dandelion 1
+# rose 2
+# sunflower 3
+# tulip 4
+def loadImages():
+    print("Load flower images")
+    images = []
+    targets = []
+    
+    image_size = (224, 224) # Fixed size for all images
+    import glob
+    # smoothed_grey_flower_photos
+    daisy_path = glob.glob("flower_photos/daisy/*.jpg")
+    count = 0
+    for file_path in daisy_path:
+        # img = cv2.imread(file_path)
+        img = cv2.resize(cv2.imread(file_path), image_size)
+        images.append(img.flatten())
+        targets.append(0)
+
+    # import glob
+    # daisy_path = glob.glob("flower_photos/daisy/*.jpg")
+    # for file_path in daisy_path:
+    #     img = cv2.imread(file_path)
+    #     assert(len(img.shape) == 3)
+    #     print(img.shape)
+    #     images.append(img)
+    #     targets.append(0)
+        
+    #     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    #     cv2.imwrite(file_path.replace('flower_photos', 'grey_flower_photos'), gray)
+        
+    #     x = cp.Variable(gray.shape)
+    #     f = cp.sum_squares(x - gray)
+        
+    #     objective = cp.Minimize(f)
+    #     constraints = [0 <= x, x <= 255]
+        
+    #     prob = cp.Problem(objective, constraints)
+    #     prob.solve()
+    #     # get the smoothed image
+    #     smoothed = x.value.astype(np.uint8)
+    #     cv2.imwrite(file_path.replace('flower_photos', 'smoothed_grey_flower_photos'), smoothed)
+        
+        
+    # dandelion_path = glob.glob("flower_photos/dandelion/*.jpg")
+    # for file_path in dandelion_path:
+    #     img = cv2.imread(file_path)
+    #     assert(len(img.shape) == 3)
+    #     print(img.shape)
+    #     images.append(img)
+    #     targets.append(1)
+    # rose_path = glob.glob("flower_photos/roses/*.jpg")
+    # for file_path in rose_path:
+    #     img = cv2.imread(file_path)
+    #     assert(len(img.shape) == 3)
+    #     print(img.shape)
+    #     images.append(img)
+    #     targets.append(2)
+    # sunflower_path = glob.glob("flower_photos/sunflowers/*.jpg")
+    # for file_path in sunflower_path:
+    #     img = cv2.imread(file_path)
+    #     assert(len(img.shape) == 3)
+    #     print(img.shape)
+    #     images.append(img)
+    #     targets.append(3)
+    # tulip_path = glob.glob("flower_photos/tulips/*.jpg")
+    # for file_path in tulip_path:
+    #     img = cv2.imread(file_path)
+    #     assert(len(img.shape) == 3)
+    #     print(img.shape)
+    #     images.append(img)
+    #     targets.append(4)
+    
+    print(f"There are 4 labels in classes.")
+    return images, targets
 
 # This can be implemented later.
 def preProcessing(X, y):
-    return X, y
+    for img, label in zip(X, y):
+        img = cv2.imread('flowers/daisy/5547758_eea9edfd54_n.jpg')
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        x = cp.Variable(gray.shape)
+        f = cp.sum_squares(x - gray)
+        
+        objective = cp.Minimize(f)
+        constraints = [0 <= x, x <= 255]
+        
+        prob = cp.Problem(objective, constraints)
+        prob.solve()
+        # get the smoothed image
+        smoothed = x.value.astype(np.uint8)
+        if label == 0:
+            cv2.imwrite()
 
-def pNorm(X, p=1):
-    print(X)
-    # calculate the p-norm of x
-    p_norm = 0
-    for row in X:
-        for data in row:
-            p_norm += data**p
-    return p_norm**(1/p)
+def cov_value(x,y):
+    mean_x = sum(x) / float(len(x))
+    mean_y = sum(y) / float(len(y))
+    
+    sub_x = [i - mean_x for i in x]
+    sub_y = [i - mean_y for i in y]
+    
+    sum_value = sum([sub_y[i]*sub_x[i] for i in range(len(x))])
+    denom = float(len(x)-1)
+    
+    cov = sum_value/denom
+    return cov
 
+def covariance(arr):
+    c = [[cov_value(a,b) for a in arr] for b in arr]
+    return c
+    
 # TODO: Implement Convex optimization here!
 def dataProcessing(G):
     # Applies Convex Optimization.
@@ -69,7 +169,6 @@ def dataProcessing(G):
     # sigmaX = 0
     # sigmaY = 0
     # window = (5, 5)
-    beta = 0.001
     
     sigmaXDim = (232, 320)
     # m = {}
@@ -77,7 +176,7 @@ def dataProcessing(G):
     sigmaX = cp.Variable(1)
     sigmaY = cp.Variable(1)
     window = cp.Variable((2,2))
-    beta = 0.5
+    beta = 0.001
     
     # X = cv2.GaussianBlur(G, window, sigmaX, sigmaY) # R 
     # val = 
@@ -85,7 +184,7 @@ def dataProcessing(G):
     print(X + np.zeros((232, 320)))
 
     prob = cp.Problem(
-        cp.Minimize((cp.norm(X - G, 'fro')) ** 2 + beta * pNorm(X, 2))
+        cp.Minimize((cp.norm(X - G, 'fro')) ** 2 + beta * covariance(X))
     )
     prob.solve()
     print(prob.value)
@@ -119,31 +218,39 @@ def training(X, y):
     print('Test accuracy:', acc)
 
 if __name__ == '__main__':
-    # Dataset Refs:
-        # 1. FASHION_MNIST
-        # 2. BREAST_CANCER
-        # 3. IRIS_DATASET
-        # 4. WINE_DATASET
-    
-    # i = 0
-    # for data_set in ALL_DATASET:
-    #     print(f"{i}: {data_set}")
-    #     X, y = loadData(data_set)
-        
-    #     print("Data preprocessing")
-    #     X, y = preProcessing(X, y)
+    X, y = loadImages()
+    training(X, y)
 
-    #     print("Train Before Data Processing")
-    #     training(X, y)
+# if __name__ == '__main__':
+#     X, y = loadImages()
+    # training(X, y)
 
-    #     print("Train After Data Processing")
-    #     X = dataProcessing(X)
-    #     training(X, y)
-    #     print()
-    #     i += 1
+
+    # img = cv2.imread('flowers/daisy/5547758_eea9edfd54_n.jpg')
+    # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
-    image = cv2.cvtColor(cv2.imread('flowers/daisy/5547758_eea9edfd54_n.jpg'), cv2.COLOR_BGR2GRAY)
-    number = dataProcessing(image)
+    # x = cp.Variable(gray.shape)
+    # f = cp.sum_squares(x - gray)
+    
+    # objective = cp.Minimize(f)
+    # constraints = [0 <= x, x <= 255]
+    
+    # prob = cp.Problem(objective, constraints)
+    # prob.solve()
+    # # get the smoothed image
+    # smoothed = x.value.astype(np.uint8)
+
+    # # plot the results
+    # fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    # axs[0].imshow(gray, cmap='gray')
+    # axs[0].set_title('Input image')
+    # axs[1].imshow(smoothed, cmap='gray')
+    # axs[1].set_title('Smoothed image')
+    # plt.show()
+    
+
+    # image = cv2.cvtColor(cv2.imread('flowers/daisy/5547758_eea9edfd54_n.jpg'), cv2.COLOR_BGR2GRAY)
+    # number = dataProcessing(image)
     # print(type(number))
     # cv2.imshow('name', image)
     # cv2.imshow('name2', imageProcessed)
