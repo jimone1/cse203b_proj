@@ -2,4 +2,7 @@
 
 - We downloaded fashioon-mnist folder and implemented our convex optimiation techniques for image smoothing and classification with CVXPY and sklearn.
 
-- Our code is in `main.ipynb` in `fashion-mnist` folder.
+#### Reproducing
+
+- Move `main.ipynb` to `fashion-mnist` folder.
+- Run the code in main.ipynb to see the results.
